@@ -898,6 +898,7 @@ static unsigned long currentTime = 0;
 int idealBeepInterval;
 int beepInterval;
 int currentInterval = 0;
+int totalTime = 0;
 
 // States
 enum states {
@@ -1205,9 +1206,10 @@ void loop() {
       if (countDownTimer == 0) {
         appState = timer;
         paceSeconds = seconds + minutes * 60;
-        timerSeconds = paceSeconds * (miles + (decimal / 100.0));
+        timerSeconds = (int) paceSeconds * (miles + float(decimal / 100.0));
         idealBeepInterval = paceSeconds;
         beepInterval = idealBeepInterval;
+        totalTime = timerSeconds;
       };
       delay(1000);
       break;
@@ -1219,10 +1221,10 @@ void loop() {
       // Handle the buzzer without delaying the rest of the code
       if (currentTime - lastBeepTime >= beepInterval) {
         if (currentInterval < (idealBeepInterval * 0.75)) {
-          tone(BUZZER_PIN, 500, 100);
+          tone(BUZZER_PIN, 2000, 100);
         }
         else if (currentInterval > (idealBeepInterval * 1.25)) {
-          tone(BUZZER_PIN, 2000, 100);
+          tone(BUZZER_PIN, 500, 100);
         }
         else tone(BUZZER_PIN, 1000, 100); // Beep for 100ms
         lastBeepTime = currentTime;
@@ -1236,7 +1238,7 @@ void loop() {
         timerSeconds--;
         elapsedTime++;
         lastTimerUpdate = currentTime;
-        beepInterval = (int) ((timerSeconds * 1000.0) / ((float)(idealBeepInterval / 1000.0) * paceSeconds - (float)steps / 2.0)); 
+        beepInterval = (int) ((timerSeconds * 1000.0) / (float)((miles + float(decimal / 100.0)) * 1000 - steps)); 
         Serial.println(beepInterval);
         beepInterval = min(beepInterval, 1000);
         beepInterval = max(beepInterval, 150);
